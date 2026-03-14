@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FeatureFolio.Application/FeatureFolio.Application.csproj" />
+  <Project Path="FeatureFolio.Domain/FeatureFolio.Domain.csproj" />
+  <Project Path="FeatureFolio.Infrastructure/FeatureFolio.Infrastructure.csproj" />
+  <Project Path="FeatureFolioAPI/FeatureFolio.API.csproj" />
+</Solution>
