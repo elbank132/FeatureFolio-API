@@ -1,26 +1,43 @@
 ﻿using Azure.Identity;
+using FeatureFolio.Application.Interfaces;
+using FeatureFolio.Infrastructure.Options;
+using FeatureFolio.Infrastructure.Services;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
 
 namespace FeatureFolio.API.Extensions;
 
 public static class BuilderExtensions
 {
+    public static IServiceCollection AddSettingsOptions(this IServiceCollection services, IConfiguration config)
+    {
+        // Bind and validate the options
+        services.AddOptions<AzureOptions>()
+            .Bind(config.GetSection(AzureOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart(); // Fail fast if config is missing!
+
+        return services;
+    }
     public static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddAzureClients(clientBuilder =>
         {
+            var azureOptions = new AzureOptions();
+            config.GetSection(AzureOptions.SectionName).Bind(azureOptions);
+
             // Apply DefaultAzureCredential to all registered clients
             clientBuilder.UseCredential(new DefaultAzureCredential());
 
             // Register Blob Storage
-            var storageUrl = config["Azure:StorageUrl"];
+            var storageUrl = azureOptions.storageOptions.StorageUrl;
             if (!string.IsNullOrEmpty(storageUrl))
             {
                 clientBuilder.AddBlobServiceClient(new Uri(storageUrl));
             }
 
             // Register Service Bus
-            var serviceBusNamespace = config["Azure:ServiceBusNamespace"];
+            var serviceBusNamespace = azureOptions.serviceBusOptions.ServiceBusNamespace;
             if (!string.IsNullOrEmpty(serviceBusNamespace))
             {
                 clientBuilder.AddServiceBusClientWithNamespace(serviceBusNamespace);
@@ -29,17 +46,25 @@ public static class BuilderExtensions
             services.AddHealthChecks()
                 // 1. Azure Blob Storage Health Check
                 .AddAzureBlobStorage(
-                    new Uri(config["Azure:StorageUrl"]!),
+                    new Uri(azureOptions.storageOptions.StorageUrl),
                     new DefaultAzureCredential(),
                     name: "BlobStorageCheck")
 
                 // 2. Azure Service Bus Queue Health Check
                 .AddAzureServiceBusTopic(
-                    config["Azure:ServiceBusNamespace"]!,
-                    "process-images-topic", // Replace with your actual queue name
+                    azureOptions.serviceBusOptions.ServiceBusNamespace,
+                    azureOptions.serviceBusOptions.ImagesTopicName, // Replace with your actual queue name
                     new DefaultAzureCredential(),
                     name: "ServiceBusCheck");
         });
+
+        return services;
+    }
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddSingleton<DefaultAzureCredential>();
+
+        services.AddSingleton<IMessagePublisher, MessagePublisher>();
 
         return services;
     }
