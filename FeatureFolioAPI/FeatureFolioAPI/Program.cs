@@ -10,6 +10,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
         .Enrich.FromLogContext());
 
 // Add services to the container.
+builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddSettingsOptions(builder.Configuration);
 builder.Services.AddAzureServices(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);

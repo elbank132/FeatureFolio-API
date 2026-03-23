@@ -17,6 +17,11 @@ public static class BuilderExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart(); // Fail fast if config is missing!
 
+        services.AddOptions<RedisOptions>()
+            .Bind(config.GetSection(RedisOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart(); // Fail fast if config is missing!
+
         return services;
     }
     public static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration config)
@@ -65,8 +70,26 @@ public static class BuilderExtensions
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddSingleton<IMessagePublisher, MessagePublisher>();
+        services.AddScoped<ICacheService, CacheService>();
+
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<IImageService, ImageService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration config)
+    {
+        var redisOptions = new RedisOptions();
+        config.GetSection(RedisOptions.SectionName).Bind(redisOptions);
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            // "localhost:6379" points to your Docker container. 
+            // Later in Kubernetes, you just change this string to "redis-master:6379"
+            options.Configuration = $"{redisOptions.Configuration}:{redisOptions.Port}";
+            options.InstanceName = redisOptions.KeyPrefix;
+        });
 
         return services;
     }
