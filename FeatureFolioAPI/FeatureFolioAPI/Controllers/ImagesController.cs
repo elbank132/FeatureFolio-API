@@ -7,10 +7,12 @@ namespace FeatureFolio.API.Controllers;
 public class ImagesController : ApiBaseController
 {
     private readonly IImageService _imageService;
+    private readonly ICacheService cacheService;
 
-    public ImagesController(IImageService imageService)
+    public ImagesController(IImageService imageService, ICacheService cacheService)
     {
         _imageService = imageService;
+        this.cacheService = cacheService;
     }
 
     [HttpGet("{amount}")]

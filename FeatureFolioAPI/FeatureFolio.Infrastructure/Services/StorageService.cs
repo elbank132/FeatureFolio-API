@@ -19,7 +19,7 @@ public class StorageService : IStorageService
         _blobServiceClient = blobServiceClient;
     }
 
-    public async Task<List<ImageSas>> GenerateSasBatch(int batchSize)
+    public async Task<List<ImageSas>> GenerateSasBatchAsync(int batchSize)
     {
         string containerName = _azureOptions.storageOptions.ImagesContainerName;
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);

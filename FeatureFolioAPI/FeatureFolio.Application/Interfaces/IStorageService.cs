@@ -4,5 +4,5 @@ namespace FeatureFolio.Application.Interfaces;
 
 public interface IStorageService
 {
-    public Task<List<ImageSas>> GenerateSasBatch(int batchSize);
+    public Task<List<ImageSas>> GenerateSasBatchAsync(int batchSize);
 }

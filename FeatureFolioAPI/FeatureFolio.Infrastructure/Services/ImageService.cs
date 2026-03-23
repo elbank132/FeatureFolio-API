@@ -17,7 +17,7 @@ public class ImageService : IImageService
 
     public async Task<ICollection<string>> GetImageSasUrlsAsync(int amount)
     {
-        var sasList = await _storageService.GenerateSasBatch(amount);
+        var sasList = await _storageService.GenerateSasBatchAsync(amount);
 
         var res = sasList.Select(s => s.UploadUrl).ToList();
 
