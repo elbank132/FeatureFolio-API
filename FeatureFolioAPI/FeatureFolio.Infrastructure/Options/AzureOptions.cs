@@ -16,4 +16,5 @@ public class ServiceBusOptions
 public class StorageOptions
 {
     public string StorageUrl { get; set; } = String.Empty;
+    public string ImagesContainerName { get; set; } = string.Empty;
 }
