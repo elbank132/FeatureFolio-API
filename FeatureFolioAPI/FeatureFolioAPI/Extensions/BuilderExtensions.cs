@@ -21,6 +21,8 @@ public static class BuilderExtensions
     }
     public static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration config)
     {
+        services.AddSingleton<DefaultAzureCredential>();
+
         services.AddAzureClients(clientBuilder =>
         {
             var azureOptions = new AzureOptions();
@@ -62,9 +64,9 @@ public static class BuilderExtensions
     }
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
     {
-        services.AddSingleton<DefaultAzureCredential>();
-
         services.AddSingleton<IMessagePublisher, MessagePublisher>();
+        services.AddScoped<IStorageService, StorageService>();
+        services.AddScoped<IImageService, ImageService>();
 
         return services;
     }
