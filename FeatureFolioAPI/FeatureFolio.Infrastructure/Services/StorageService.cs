@@ -73,4 +73,20 @@ public class StorageService : IStorageService
 
         return imageSas;
     }
+
+    public async Task<bool> VerifyAllBlobsExistAsync(List<string> blobNames)
+    {
+        var containerClient = _blobServiceClient.GetBlobContainerClient(_azureOptions.storageOptions.ImagesContainerName);
+
+        var tasks = blobNames.Select(name =>
+        {
+            var blobClient = containerClient.GetBlobClient(name);
+            return blobClient.ExistsAsync(); 
+        });
+
+        var responses = await Task.WhenAll(tasks);
+
+        return responses.All(r => r.Value);
+    }
+
 }
