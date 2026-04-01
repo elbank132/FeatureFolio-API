@@ -16,9 +16,20 @@ public class ImagesController : ApiBaseController
     }
 
     [HttpGet("{amount}")]
-    public async Task<IActionResult> GetImagesSas([FromRoute] int amount) {
-        var sasUrls = await _imageService.GetImageSasUrlsAsync(amount);
+    public async Task<IActionResult> GetImagesSas([FromRoute] int amount, [FromQuery] string userGuid) {
+        var sasUrls = await _imageService.GetImageSasUrlsAsync(amount, userGuid);
 
         return Ok(sasUrls);
+    }
+
+    [HttpPost("finished")]
+    public async Task<IActionResult> FinishedUploading([FromQuery] string userguid)
+    {
+        bool status = await _imageService.ValidateImagesExistAsync(userguid);
+        if (status)
+        {
+            return NoContent();
+        }
+        return BadRequest();
     }
 }
