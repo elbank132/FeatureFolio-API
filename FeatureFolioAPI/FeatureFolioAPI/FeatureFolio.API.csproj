@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FeatureFolio.Application\FeatureFolio.Application.csproj" />
+    <ProjectReference Include="..\FeatureFolio.Domain\FeatureFolio.Domain.csproj" />
     <ProjectReference Include="..\FeatureFolio.Infrastructure\FeatureFolio.Infrastructure.csproj" />
   </ItemGroup>
 

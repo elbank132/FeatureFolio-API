@@ -1,4 +1,4 @@
-﻿namespace FeatureFolio.Domain.Exceptions.Exceptions;
+﻿namespace FeatureFolio.Domain.Exceptions;
 
 public class BlobNotFoundException : Exception
 {

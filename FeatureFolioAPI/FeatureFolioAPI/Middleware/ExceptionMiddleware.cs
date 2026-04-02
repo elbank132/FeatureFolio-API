@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using FeatureFolio.Domain.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IWebHostEnvironment env) : IExceptionHandler
@@ -10,9 +11,18 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IWeb
     {
         logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
+        var statusCode = exception switch
+        {
+            ArgumentException => StatusCodes.Status400BadRequest,
+            KeyNotFoundException => StatusCodes.Status404NotFound,
+            BlobNotFoundException => StatusCodes.Status422UnprocessableEntity,
+            RedisInvalidDataException => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status500InternalServerError
+        };
+
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status500InternalServerError,
+            Status = statusCode,
             Title = "An unexpected error occurred",
             Type = exception.GetType().Name,
             Detail = env.IsDevelopment() ? exception.Message : null

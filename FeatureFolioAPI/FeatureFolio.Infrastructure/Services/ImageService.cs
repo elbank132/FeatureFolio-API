@@ -1,5 +1,5 @@
 ﻿using FeatureFolio.Application.Interfaces;
-using FeatureFolio.Domain.Exceptions.Exceptions;
+using FeatureFolio.Domain.Exceptions;
 
 namespace FeatureFolio.Infrastructure.Services;
 
