@@ -25,11 +25,8 @@ public class ImagesController : ApiBaseController
     [HttpPost("finished")]
     public async Task<IActionResult> FinishedUploading([FromQuery] string userguid)
     {
-        bool status = await _imageService.ValidateImagesExistAsync(userguid);
-        if (status)
-        {
-            return NoContent();
-        }
-        return BadRequest();
+        await _imageService.ProcessFinishedUploadingAsync(userguid);
+
+        return NoContent();
     }
 }

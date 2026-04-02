@@ -1,4 +1,5 @@
 ﻿using FeatureFolio.Application.Interfaces;
+using FeatureFolio.Domain.Exceptions.Exceptions;
 
 namespace FeatureFolio.Infrastructure.Services;
 
@@ -24,19 +25,24 @@ public class ImageService : IImageService
         return res;
     }
 
-    public async Task<bool> ValidateImagesExistAsync(string userGuid)
+    public async Task ProcessFinishedUploadingAsync(string userGuid)
+    {
+        await ValidateImagesExistAsync(userGuid);
+        await _cacheService.RemoveAsync(userGuid);
+    }
+
+    private async Task ValidateImagesExistAsync(string userGuid)
     {
         var imageNamesList = await _cacheService.GetAsync<List<string>>(userGuid);
         if (imageNamesList == null || imageNamesList.Count == 0)
         {
-            return false;
+            throw new RedisInvalidDataException(userGuid);
         }
 
         bool allImagesExist = await _storageService.VerifyAllBlobsExistAsync(imageNamesList);
-        if (allImagesExist) 
+        if (!allImagesExist) 
         {
-            await _cacheService.RemoveAsync(userGuid);
+            throw new BlobNotFoundException(imageNamesList);
         }
-        return allImagesExist;
     }
 }
