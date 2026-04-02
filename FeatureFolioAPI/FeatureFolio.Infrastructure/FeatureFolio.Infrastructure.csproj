@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FeatureFolio.Application\FeatureFolio.Application.csproj" />
+    <ProjectReference Include="..\FeatureFolio.Domain\FeatureFolio.Domain.csproj" />
   </ItemGroup>
 
 </Project>
