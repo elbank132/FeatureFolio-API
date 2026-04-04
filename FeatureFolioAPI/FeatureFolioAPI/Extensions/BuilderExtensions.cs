@@ -1,9 +1,9 @@
 ﻿using Azure.Identity;
+using FeatureFolio.Application.Services;
 using FeatureFolio.Application.Interfaces;
 using FeatureFolio.Infrastructure.Options;
 using FeatureFolio.Infrastructure.Services;
 using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Options;
 
 namespace FeatureFolio.API.Extensions;
 
@@ -15,12 +15,17 @@ public static class BuilderExtensions
         services.AddOptions<AzureOptions>()
             .Bind(config.GetSection(AzureOptions.SectionName))
             .ValidateDataAnnotations()
-            .ValidateOnStart(); // Fail fast if config is missing!
+            .ValidateOnStart();
 
         services.AddOptions<RedisOptions>()
             .Bind(config.GetSection(RedisOptions.SectionName))
             .ValidateDataAnnotations()
-            .ValidateOnStart(); // Fail fast if config is missing!
+            .ValidateOnStart();
+
+        services.AddOptions<AuthOptions>()
+            .Bind(config.GetSection(AuthOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return services;
     }
@@ -70,10 +75,12 @@ public static class BuilderExtensions
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddSingleton<IMessagePublisher, MessagePublisher>();
-        services.AddScoped<ICacheService, CacheService>();
 
+        services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
