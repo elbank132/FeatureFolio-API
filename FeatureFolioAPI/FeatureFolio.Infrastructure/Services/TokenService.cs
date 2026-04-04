@@ -33,6 +33,7 @@ namespace FeatureFolio.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Sub, authResult.UserId),
                 new Claim(JwtRegisteredClaimNames.Email, authResult.Email),
                 new Claim(JwtRegisteredClaimNames.Name, authResult.Username),
+                new Claim(JwtRegisteredClaimNames.Picture, authResult.PictureURL),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

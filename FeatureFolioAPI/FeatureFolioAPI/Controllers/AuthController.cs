@@ -1,8 +1,12 @@
-﻿using FeatureFolio.Application.Interfaces;
+﻿using FeatureFolio.API.Extensions;
+using FeatureFolio.Application.Interfaces;
 using FeatureFolio.Domain;
 using FeatureFolio.Infrastructure.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace FeatureFolio.API.Controllers;
 
@@ -18,6 +22,15 @@ public class AuthController : ApiBaseController
         _jwtOptions = jwtOptions.Value;
     }
 
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> TryGetUserData()
+    {
+        var authDto = User.ToAuthDto();
+
+        return Ok(authDto);
+    }
+
     [HttpPost("google")]
     public async Task<IActionResult> Login([FromBody] string token)
     {
@@ -28,7 +41,7 @@ public class AuthController : ApiBaseController
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes)
         };
 
