@@ -57,7 +57,7 @@ public class ImageService : IImageService
         var images = new ImagesUploadedEntry
         {
             EventId = "EventId",
-            imagenames = imagesNamesList,
+            ImageNames = imagesNamesList,
             TimeStamp = DateTime.Now,
             UserGuid = userGuid
         };
