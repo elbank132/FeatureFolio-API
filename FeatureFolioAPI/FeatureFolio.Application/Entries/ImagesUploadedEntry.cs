@@ -2,5 +2,8 @@
 
 public class ImagesUploadedEntry : BaseEntry
 {
-    public ICollection<string> ImagesUrls { get; set; } = new List<string>();
+    public ICollection<string> imagenames { get; set; } = new List<string>();
+    public string UserGuid { get; set; } = String.Empty;
+
+    public string EventId{ get; set; } = String.Empty;
 }
