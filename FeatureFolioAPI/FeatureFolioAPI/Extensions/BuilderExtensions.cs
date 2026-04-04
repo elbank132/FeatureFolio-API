@@ -1,9 +1,14 @@
 ﻿using Azure.Identity;
-using FeatureFolio.Application.Services;
 using FeatureFolio.Application.Interfaces;
+using FeatureFolio.Application.Services;
+using FeatureFolio.Domain;
 using FeatureFolio.Infrastructure.Options;
 using FeatureFolio.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Azure;
+using Microsoft.IdentityModel.Tokens;
+using System.Reflection.Metadata;
+using System.Text;
 
 namespace FeatureFolio.API.Extensions;
 
@@ -24,6 +29,11 @@ public static class BuilderExtensions
 
         services.AddOptions<AuthOptions>()
             .Bind(config.GetSection(AuthOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<JwtOptions>()
+            .Bind(config.GetSection(JwtOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -81,10 +91,10 @@ public static class BuilderExtensions
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ITokenService, TokenService>();
 
         return services;
     }
-
     public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration config)
     {
         var redisOptions = new RedisOptions();
@@ -96,6 +106,55 @@ public static class BuilderExtensions
             // Later in Kubernetes, you just change this string to "redis-master:6379"
             options.Configuration = $"{redisOptions.Configuration}:{redisOptions.Port}";
             options.InstanceName = redisOptions.KeyPrefix;
+        });
+
+        return services;
+    }
+    public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration config)
+    {
+        var jwtOptions = new JwtOptions();
+        config.GetSection(JwtOptions.SectionName).Bind(jwtOptions);
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            Environment.GetEnvironmentVariable(Constants.JWT_SECRET_KEY)!)
+                        )
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies[Constants.AUTH_SESSION];
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        return services;
+    }
+    public static IServiceCollection AddDevelopmentCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(Constants.DEV_CORS, policy =>
+            {
+                policy.WithOrigins("http://localhost:5173")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
         });
 
         return services;

@@ -28,6 +28,7 @@ public class GoogleAuthService : IGoogleAuthService
 
         return new AuthResult
         {
+            UserId = payload.Subject,
             Username = payload.Name,
             Email = payload.Email,
             PictureURL = payload.Picture

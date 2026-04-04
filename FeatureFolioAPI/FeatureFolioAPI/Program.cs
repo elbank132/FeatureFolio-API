@@ -1,5 +1,9 @@
+using DotNetEnv;
 using FeatureFolio.API.Extensions;
+using FeatureFolio.Domain;
 using Serilog;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +20,8 @@ builder.Services.AddAzureServices(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddDevelopmentCors();
+builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -30,6 +36,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(Constants.DEV_CORS);
 
 app.UseAuthorization();
 
