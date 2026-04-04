@@ -24,7 +24,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IWeb
         {
             Status = statusCode,
             Title = "An unexpected error occurred",
-            Type = exception.GetType().Name,
+            Type = env.IsDevelopment() ? exception.GetType().Name : null,
             Detail = env.IsDevelopment() ? exception.Message : null
         };
 
