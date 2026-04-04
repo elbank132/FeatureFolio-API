@@ -1,6 +1,6 @@
 ﻿using FeatureFolio.Application.Entries;
 using FeatureFolio.Application.Interfaces;
-using FeatureFolio.Domain.Exceptions.Exceptions;
+using FeatureFolio.Domain.Exceptions;
 
 namespace FeatureFolio.Infrastructure.Services;
 
@@ -50,8 +50,6 @@ public class ImageService : IImageService
         }
 
         return imageNamesList;
-        
-
     }
 
     private async Task PublishImagesUploadedMessageAsync(string userGuid, List<string> imagesNamesList)
