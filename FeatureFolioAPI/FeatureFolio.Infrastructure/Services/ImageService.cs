@@ -1,4 +1,5 @@
-﻿using FeatureFolio.Application.Interfaces;
+﻿using FeatureFolio.Application.Entries;
+using FeatureFolio.Application.Interfaces;
 using FeatureFolio.Domain.Exceptions;
 
 namespace FeatureFolio.Infrastructure.Services;
@@ -7,10 +8,12 @@ public class ImageService : IImageService
 {
     private readonly IStorageService _storageService;
     private readonly ICacheService _cacheService;
-    public ImageService(IStorageService storageService, ICacheService cacheService)
+    private readonly IMessagePublisher _messagePublisher;
+    public ImageService(IStorageService storageService, ICacheService cacheService, IMessagePublisher messagePublisher)
     {
         _storageService = storageService;
         _cacheService = cacheService;
+        _messagePublisher = messagePublisher;
     }
 
     public async Task<ICollection<string>> GetImageSasUrlsAsync(int amount, string userGuid)
@@ -27,11 +30,12 @@ public class ImageService : IImageService
 
     public async Task ProcessFinishedUploadingAsync(string userGuid)
     {
-        await ValidateImagesExistAsync(userGuid);
+        var imagesNamesList = await GetImagesListAsync(userGuid);
+        await PublishImagesUploadedMessageAsync(userGuid, imagesNamesList);
         await _cacheService.RemoveAsync(userGuid);
     }
 
-    private async Task ValidateImagesExistAsync(string userGuid)
+    private async Task<List<string>> GetImagesListAsync(string userGuid)
     {
         var imageNamesList = await _cacheService.GetAsync<List<string>>(userGuid);
         if (imageNamesList == null || imageNamesList.Count == 0)
@@ -44,5 +48,20 @@ public class ImageService : IImageService
         {
             throw new BlobNotFoundException(imageNamesList);
         }
+
+        return imageNamesList;
+    }
+
+    private async Task PublishImagesUploadedMessageAsync(string userGuid, List<string> imagesNamesList)
+    {
+        var images = new ImagesUploadedEntry
+        {
+            EventId = "EventId",
+            ImageNames = imagesNamesList,
+            TimeStamp = DateTime.Now,
+            UserGuid = userGuid
+        };
+
+        await _messagePublisher.PublishMessageAsync(images);
     }
 }
