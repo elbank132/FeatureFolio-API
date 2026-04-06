@@ -1,4 +1,5 @@
-﻿using FeatureFolio.Application.Entries;
+﻿using FeatureFolio.Application.DTOs;
+using FeatureFolio.Application.Entries;
 using FeatureFolio.Application.Interfaces;
 using FeatureFolio.Domain.Exceptions;
 
@@ -16,14 +17,18 @@ public class ImageService : IImageService
         _messagePublisher = messagePublisher;
     }
 
-    public async Task<ICollection<string>> GetImageSasUrlsAsync(int amount, string userGuid)
+    public async Task<ImageTokensDto> GetImageSasUrlsAsync(int amount, string userGuid)
     {
         var sasList = await _storageService.GenerateSasBatchAsync(amount);
 
         var blobList = sasList.Select(s => s.BlobName).ToList();
         await _cacheService.SetAsync(userGuid, blobList);
         
-        var res = sasList.Select(s => s.UploadUrl).ToList();
+        var tokensList = sasList.Select(s => s.UploadUrl).ToList();
+        var res = new ImageTokensDto
+        {
+            ImageSasUrls = tokensList
+        };
 
         return res;
     }
