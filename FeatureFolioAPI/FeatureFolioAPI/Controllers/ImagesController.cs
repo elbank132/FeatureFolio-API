@@ -18,7 +18,7 @@ public class ImagesController : ApiBaseController
     [Authorize]
     [HttpGet("{amount}")]
     public async Task<IActionResult> GetImagesSas([FromRoute] int amount) {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException(); 
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException();
         var sasUrls = await _imageService.GetImageSasUrlsAsync(amount, userId);
 
         return Ok(sasUrls);
