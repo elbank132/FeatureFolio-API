@@ -1,5 +1,7 @@
 ﻿using FeatureFolio.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FeatureFolio.API.Controllers;
 
@@ -7,25 +9,27 @@ namespace FeatureFolio.API.Controllers;
 public class ImagesController : ApiBaseController
 {
     private readonly IImageService _imageService;
-    private readonly ICacheService cacheService;
 
-    public ImagesController(IImageService imageService, ICacheService cacheService)
+    public ImagesController(IImageService imageService)
     {
         _imageService = imageService;
-        this.cacheService = cacheService;
     }
 
+    [Authorize]
     [HttpGet("{amount}")]
-    public async Task<IActionResult> GetImagesSas([FromRoute] int amount, [FromQuery] string userGuid) {
-        var sasUrls = await _imageService.GetImageSasUrlsAsync(amount, userGuid);
+    public async Task<IActionResult> GetImagesSas([FromRoute] int amount) {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException(); 
+        var sasUrls = await _imageService.GetImageSasUrlsAsync(amount, userId);
 
         return Ok(sasUrls);
     }
 
+    [Authorize]
     [HttpPost("finished")]
-    public async Task<IActionResult> FinishedUploading([FromQuery] string userguid)
+    public async Task<IActionResult> FinishedUploading()
     {
-        await _imageService.ProcessFinishedUploadingAsync(userguid);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException();
+        await _imageService.ProcessFinishedUploadingAsync(userId);
 
         return NoContent();
     }

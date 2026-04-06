@@ -2,7 +2,7 @@
 using FeatureFolio.Application.Interfaces;
 using FeatureFolio.Domain.Exceptions;
 
-namespace FeatureFolio.Infrastructure.Services;
+namespace FeatureFolio.Application.Services;
 
 public class ImageService : IImageService
 {
