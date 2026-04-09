@@ -48,11 +48,10 @@ public class ImageService : IImageService
             throw new RedisInvalidDataException(userGuid);
         }
 
-        bool allImagesExist = await _storageService.VerifyAllBlobsExistAsync(imageNamesList);
-        if (!allImagesExist) 
-        {
-            throw new BlobNotFoundException(imageNamesList);
-        }
+        var failedImages = await _storageService.VerifyAllBlobsExistAsync(imageNamesList);
+        //notify user this file failed
+
+        imageNamesList = imageNamesList.Where(image => !failedImages.Contains(image)).ToList();
 
         return imageNamesList;
     }
