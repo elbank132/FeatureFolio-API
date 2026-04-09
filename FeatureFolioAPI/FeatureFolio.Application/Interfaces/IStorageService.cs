@@ -5,5 +5,5 @@ namespace FeatureFolio.Application.Interfaces;
 public interface IStorageService
 {
     public Task<List<ImageSas>> GenerateSasBatchAsync(int batchSize);
-    public Task<bool> VerifyAllBlobsExistAsync(List<string> blobNames);
+    public Task<List<string>> VerifyAllBlobsExistAsync(List<string> blobNames);
 }
