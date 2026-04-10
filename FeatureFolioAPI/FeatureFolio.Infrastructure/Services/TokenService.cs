@@ -22,7 +22,7 @@ namespace FeatureFolio.Infrastructure.Services
 
         public string GenerateToken(AuthResult authResult)
         {
-            var secretKey = Environment.GetEnvironmentVariable(Constants.JWT_SECRET_KEY);
+            var secretKey = Environment.GetEnvironmentVariable(_options.Secret);
             if (secretKey == null) throw new MissingJwtKeyException();
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));

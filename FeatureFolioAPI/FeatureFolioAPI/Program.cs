@@ -19,9 +19,12 @@ builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddSettingsOptions(builder.Configuration);
 builder.Services.AddAzureServices(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
+builder.Services.AddPostgresDb(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddDevelopmentCors();
+
+var conString = builder.Configuration.GetConnectionString("PostgresDb");
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
