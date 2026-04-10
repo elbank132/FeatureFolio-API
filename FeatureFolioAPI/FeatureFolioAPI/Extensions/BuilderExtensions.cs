@@ -130,9 +130,7 @@ public static class BuilderExtensions
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            Environment.GetEnvironmentVariable(jwtOptions.Secret)!
-                        ))
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret))
                 };
 
                 options.Events = new JwtBearerEvents
