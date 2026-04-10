@@ -1,10 +1,13 @@
 ﻿using Azure.Identity;
 using FeatureFolio.Application.Interfaces;
+using FeatureFolio.Application.Interfaces.DB;
 using FeatureFolio.Application.Services;
 using FeatureFolio.Domain;
+using FeatureFolio.Infrastructure.DB;
 using FeatureFolio.Infrastructure.Options;
 using FeatureFolio.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata;
@@ -127,9 +130,7 @@ public static class BuilderExtensions
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            Environment.GetEnvironmentVariable(Constants.JWT_SECRET_KEY)!)
-                        )
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret))
                 };
 
                 options.Events = new JwtBearerEvents
@@ -142,6 +143,16 @@ public static class BuilderExtensions
                 };
             });
 
+        return services;
+    }
+    public static IServiceCollection AddPostgresDb(this IServiceCollection services, IConfiguration config)
+    {
+        var connectionString = config.GetConnectionString("PostgresDb");
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
         return services;
     }
     public static IServiceCollection AddDevelopmentCors(this IServiceCollection services)
